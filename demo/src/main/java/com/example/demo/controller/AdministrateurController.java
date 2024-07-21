@@ -2,17 +2,28 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Administrateur;
 import com.example.demo.entity.User;
+import com.example.demo.security.JwtAuthenticationResponse;
 import com.example.demo.service.AdministrateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.security.CustomUserDetailsService;
+import com.example.demo.security.JwtTokenProvider;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/administrateurs")
 public class AdministrateurController {
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
     private AdministrateurService administrateurService;
@@ -54,12 +65,14 @@ public class AdministrateurController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String motDePasse) {
+    public ResponseEntity<JwtAuthenticationResponse> login(@RequestParam String email, @RequestParam String motDePasse) {
         boolean loginSuccessful = administrateurService.login(email, motDePasse);
         if (loginSuccessful) {
-            return new ResponseEntity<>("Login successful", HttpStatus.OK);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            String jwt = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(userDetails, null));
+            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
         } else {
-            return new ResponseEntity<>("Login failed", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
 
