@@ -44,6 +44,11 @@ public class Employe extends User {
     @JoinColumn(name = "ficheDePoste_id")
     private FicheDePoste ficheDePoste;
 
+    // Constructor to set default role
+    public Employe() {
+        this.setRole("ROLE_EMPLOYE");
+    }
+
     // Getters and setters
     public Administrateur getAdministrateur() {
         return administrateur;

@@ -73,5 +73,8 @@ public class EmployeService extends UserService{
         // Handle other user types or throw an exception if needed
         throw new IllegalArgumentException("Unsupported user type for registration");
     }
+    public boolean existsByEmail(String email) {
+        return employeRepository.existsByEmail(email);
+    }
 }
 

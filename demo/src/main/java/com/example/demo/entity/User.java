@@ -87,6 +87,9 @@ public abstract class User implements Serializable {
     private String email;
     private String motDePasse;
 
+    // Add this field for role
+    private String role; // e.g., ROLE_ADMIN, ROLE_RH, ROLE_EMPLOYE
+
     // Getters and setters
     public int getId() {
         return id;
@@ -126,5 +129,12 @@ public abstract class User implements Serializable {
 
     public void setMotDePasse(String motDePasse) {
         this.motDePasse = motDePasse;
+    }
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

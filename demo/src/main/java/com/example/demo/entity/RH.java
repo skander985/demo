@@ -74,6 +74,11 @@ public class RH extends User {
     @OneToMany(mappedBy = "responsable", cascade = CascadeType.ALL)
     private List<FicheDePoste> ficheDePosteList;
 
+    // Constructor to set default role
+    public RH() {
+        this.setRole("ROLE_RH");
+    }
+
     // Getters and setters
     public Administrateur getAdministrateur() {
         return administrateur;

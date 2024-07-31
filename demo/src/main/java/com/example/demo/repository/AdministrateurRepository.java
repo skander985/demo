@@ -11,4 +11,6 @@ import java.util.Optional;
 @Transactional
 public interface AdministrateurRepository extends JpaRepository<Administrateur, Integer> {
     Optional<Administrateur> findByEmail(String email);
+    boolean existsByEmail(String email);
+    Optional<Administrateur> findById(Integer id);
 }

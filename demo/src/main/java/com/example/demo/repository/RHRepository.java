@@ -11,4 +11,7 @@ import java.util.Optional;
 @Transactional
 public interface RHRepository extends JpaRepository<RH, Integer> {
     Optional<RH> findByEmail(String email);
+    boolean existsByEmail(String email);
+
+
 }

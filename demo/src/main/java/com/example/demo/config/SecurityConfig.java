@@ -1,14 +1,10 @@
 package com.example.demo.config;
 
-//import com.example.demo.filter.JwtRequestFilter;
-//import com.example.demo.service.CustomUserDetailsService;
+
 import com.example.demo.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,71 +16,54 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import com.example.demo.security.JwtRequestFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-//    @Autowired
-//    private CustomUserDetailsService userDetailsService;
 
-//    @Autowired
-//    private JwtRequestFilter jwtRequestFilter;
-//
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(authorizeRequests ->
-//                        authorizeRequests
-//                                .requestMatchers(new AntPathRequestMatcher("/authenticate")).permitAll() // Allow access to the authentication endpoint without authentication
-//                                .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN") // Restrict access to "/admin/**" endpoints to users with ROLE_ADMIN
-//                                .requestMatchers(new AntPathRequestMatcher("/rh/**")).hasRole("RH") // Restrict access to "/rh/**" endpoints to users with ROLE_RH
-//                                .requestMatchers(new AntPathRequestMatcher("/employe/**")).hasRole("EMPLOYE") // Restrict access to "/employe/**" endpoints to users with ROLE_EMPLOYE
-//                                .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll() // Allow access to Swagger UI and API docs
-//                                .anyRequest().authenticated() // Require authentication for any other request
-//                )
-//                .sessionManagement(sessionManagement ->
-//                        sessionManagement
-//                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Ensure stateless session management
-//                )
-//                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before UsernamePasswordAuthenticationFilter
-//
-//        return http.build();
-//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-
-                                .anyRequest().permitAll()  // Require authentication for any other request
-                );
+                                .requestMatchers("/api/auth/**").permitAll() // Allow access to authentication endpoints without authentication
+                                .requestMatchers("/v3/api-docs/**").permitAll() // Allow access to OpenAPI docs
+                                .requestMatchers("/swagger-ui.html").permitAll() // Allow access to Swagger UI HTML
+                                .requestMatchers("/swagger-ui/**").permitAll() // Allow access to Swagger UI resources
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/rhs/**").hasRole("RH")
+                                .requestMatchers("/api/employe/**").hasRole("EMPLOYEE")
+                                .requestMatchers("/api/ficheDePoste/voir/**").authenticated() // Allow authenticated users to view
+                                .requestMatchers("/api/ficheDePoste/export").authenticated() // Allow authenticated users to export
+                                .requestMatchers("/api/ficheDePoste/**").hasAnyRole("ADMIN", "RH") // Restrict other ficheDePoste operations to ADMIN or RH
+                                .anyRequest().authenticated()
+                )
+                .sessionManagement(sessionManagement ->
+                        sessionManagement
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
 
 
         return http.build();
     }
 
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
-
-
-
-
-
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-//        return authenticationConfiguration.getAuthenticationManager();
-//    }
 
     @Bean
     public UserDetailsService userDetailsService() {
